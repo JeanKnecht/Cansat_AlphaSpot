@@ -194,12 +194,14 @@ void loop() {
     prevTime = currentTime;
     }
 
-  if(x == 1000000){
+  if(x == 100){
     Serial.println("metingen zijn gedaan");
     exit(0);
     }
   x++;
 
+  gps.close();
+  data.close();
   delay(100);
 }
 

@@ -95,6 +95,19 @@ void setup() {
   GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA); //Tell GPS we want only $GPRMC and $GPGGA NMEA sentences
   GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);   // 1 Hz update rate - kan 1HZ, 5HZ of 10HZ zijn
   delay(1000);  //Pause
+
+
+  //wachten tot gps een signaal heeft -> wanneer latitude != 0
+  bool waiting = true;
+  while(waiting){
+    readGPS();
+    if(gps_latitude != 0){
+      Serial.println("connection made!");
+      waiting = false;
+      }
+    Serial.println("connecting.....");
+    }
+    
   
   //SD card
   pinMode(pin_cs, OUTPUT);

@@ -46,8 +46,8 @@ int RFM69_CS = 11;
 int RFM69_INT = 9;
 int RFM69_RST = 12;
 RH_RF69 rf69(RFM69_CS, RFM69_INT);
-char packet[30];
-static int sendlength = 30;
+char packet[50];
+static int sendlength = 50;
 
 //gps
 Adafruit_GPS GPS(&GPSSerial); //Create GPS object
@@ -189,6 +189,8 @@ void loop() {
     //Serial.print('\t');
     //Serial.print(gps_speed);
     write_gps_to_SD(gps_latitude,gps_longitude,gps_altitude);
+    gps_altitude = int(gps_altitude * 100);
+    senddata(gps_latitude, gps_longitude, gps_altitude);
     prevTime = currentTime;
     }
 
@@ -341,4 +343,11 @@ void clearGPS() {  //Since between GPS reads, we still have data streaming in, w
  
 }
 
-//void senddata(){} //convert each gps coordinate to int
+void senddata(int a, int b, int c){
+  sprintf(packet, "%d,%d,%d", a,b,c);
+  Serial.println(packet);
+  rf69.send((uint8_t *)packet, sendlength); //sent encoded packet
+  rf69.waitPacketSent();
+  Serial.println("packet is sent");
+  
+  }

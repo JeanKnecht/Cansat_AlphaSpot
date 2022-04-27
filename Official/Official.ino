@@ -34,21 +34,6 @@ File data;
 File gps;
 int pin_cs = 5;
 
-//time
-unsigned long Time;
-
-//for testing 5000 times
-int x = 0;
-
-//radio (only for gps coordinates)
-int RF69_FREQ = 434.0;
-int RFM69_CS = 11;
-int RFM69_INT = 9;
-int RFM69_RST = 12;
-RH_RF69 rf69(RFM69_CS, RFM69_INT);
-char packet[50];
-static int sendlength = 50;
-
 //gps
 Adafruit_GPS GPS(&GPSSerial); //Create GPS object
 String NMEA1;  //We will use this variable to hold our first NMEA sentence
@@ -60,34 +45,24 @@ float gps_altitude;
 float gps_speed;
 int y = 10000000.0000000000;
 
-//threading (getting gps data takes 2 seconds and a lot of data from the other sensors is lost in that time period. With threading we can run different tasks at the same time.
-unsigned long prevTime = millis();
+//time
+unsigned long Time;
+unsigned long prevTime;
+
+//for testing 5000 times
+int x = 0;
+
+//radio (only for gps coordinates)
+int RF69_FREQ = 290.0;
+int RFM69_CS = 11;
+int RFM69_INT = 9;
+int RFM69_RST = 12;
+RH_RF69 rf69(RFM69_CS, RFM69_INT);
+char packet[50];
+static int sendlength = 50;
 
 void setup() {
   Serial.begin(115200);
-
-  //Start sensors
-  bmp.begin();
-  mpu.begin();
-
-  //Setup accelerometer
-  mpu.setAccelerometerRange(MPU6050_RANGE_16_G);
-  //mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
-
-  //Setup radio
-  pinMode(RFM69_RST, OUTPUT);
-  digitalWrite(RFM69_RST, LOW);
-  digitalWrite(RFM69_RST, HIGH);
-  delay(10);
-  digitalWrite(RFM69_RST, LOW);
-  delay(10);
-  rf69.init();
-  rf69.setFrequency(434.0);
-  rf69.setTxPower(20, true); //max power
-  uint8_t key[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
-  rf69.setEncryptionKey(key);
-  Serial.print("RFM69 radio @");  Serial.print((int)RF69_FREQ);  Serial.println(" MHz"); //in code -> verstuurt via freq
 
   //setup gps
   GPS.begin(9600);       //Turn GPS on at baud rate of 9600
@@ -101,14 +76,24 @@ void setup() {
   bool waiting = true;
   while(waiting){
     readGPS();
-    if(gps_latitude != 0){
-      Serial.println("connection made!");
+    delay(1000);
+    if(GPS.fix){
+      Serial.println("location is fixed");
       waiting = false;
-      }
+      }else{
+      
     Serial.println("connecting.....");
     }
-    
-  
+  }
+  //Start sensors
+  bmp.begin();
+  mpu.begin();
+
+  //Setup accelerometer
+  mpu.setAccelerometerRange(MPU6050_RANGE_16_G);
+  //mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
+
+
   //SD card
   pinMode(pin_cs, OUTPUT);
   SD.begin();
@@ -151,10 +136,31 @@ void setup() {
     else {
     Serial.println("error opening gps.csv");
   }
+
+  //Setup radio
+  pinMode(RFM69_RST, OUTPUT);
+  digitalWrite(RFM69_RST, LOW);
+  digitalWrite(RFM69_RST, HIGH);
+  delay(10);
+  digitalWrite(RFM69_RST, LOW);
+  delay(10);
+  rf69.init();
+  rf69.setFrequency(434.0);
+  rf69.setTxPower(20, true); //max power
+  uint8_t key[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+  rf69.setEncryptionKey(key);
+  Serial.print("RFM69 radio @");  Serial.print((int)RF69_FREQ);  Serial.println(" MHz"); //in code -> verstuurt via freq
+
+  //threading (getting gps data takes 2 seconds and a lot of data from the other sensors is lost in that time period. With threading we can run different tasks at the same time.
+  prevTime = millis();
 }
+
 void loop() {
   unsigned long currentTime = millis(); //for threading
- 
+
+  //retrieving sensor data
+  
   pressure = BMP280_Pressure();
   temperature = BMP280_Temperature();
   altitude1 = BMP280_Altitude();
@@ -162,7 +168,7 @@ void loop() {
   y_acceleration = (MPU_acceleration_y());
   z_acceleration = (MPU_acceleration_z());
   Time = (millis())/1000; //convert to seconds
-  
+
   Serial.print(Time);
   Serial.print('\t');
   Serial.print(pressure);
@@ -176,33 +182,31 @@ void loop() {
   Serial.print(y_acceleration);
   Serial.print('\t');
   Serial.print(z_acceleration);
-  
 
   write_to_SD(Time,pressure,temperature,altitude1,x_acceleration,y_acceleration,z_acceleration);
-  if(currentTime - prevTime > 2000){ //it takes 2 seconds for the gps to recieve data, in that time we run the sensors instead of waiting
+  
+  //retrieving GPS data
+  if((currentTime - prevTime > 2000)){ //it takes 2 seconds for the gps to recieve data, in that time we run the sensors instead of waiting
     readGPS();
-    Serial.print(gps_latitude);
-    Serial.print('\t');
-    Serial.print(gps_longitude);
-    Serial.print('\t');
-    Serial.print(gps_altitude);
-    //Serial.print('\t');
-    //Serial.print(gps_speed);
-    write_gps_to_SD(gps_latitude,gps_longitude,gps_altitude);
-    gps_altitude = int(gps_altitude * 100);
-    senddata(gps_latitude, gps_longitude, gps_altitude);
-    prevTime = currentTime;
+    if(GPS.fix){
+      Serial.print(gps_latitude);
+      Serial.print('\t');
+      Serial.print(gps_longitude);
+      Serial.print('\t');
+      Serial.print(gps_altitude);
+      //Serial.print('\t');
+      //Serial.print(gps_speed);
+      write_gps_to_SD(gps_latitude,gps_longitude,gps_altitude);
     }
-
-  if(x == 100){
+      prevTime = currentTime;
+    }
+   if(x == 10000){
     Serial.println("metingen zijn gedaan");
     exit(0);
     }
   x++;
-
-  gps.close();
-  data.close();
   delay(100);
+
 }
 
 float BMP280_Pressure(){
@@ -288,7 +292,8 @@ void write_to_SD(float a,float b,float c,float d,float e, float f, float g){
 
 void write_gps_to_SD(float a, float b, float c){
   gps = SD.open("gps.csv", FILE_WRITE);
-
+  gps_altitude = int(gps_altitude * 100);
+  senddata(gps_latitude, gps_longitude, gps_altitude);
   if(gps){
     Serial.println("gps data opslaan naar kaart");
     a = a/y;
@@ -308,8 +313,9 @@ void write_gps_to_SD(float a, float b, float c){
   }
 
 void readGPS(){  //This function will read and remember two NMEA sentences from GPS
-  clearGPS();    //Serial port probably has old or corrupt data, so begin by clearing it all out
-  
+  //clearGPS();    //Serial port probably has old or corrupt data, so begin by clearing it all out
+
+  Serial.print("checking");
   while(!GPS.newNMEAreceived()) { //Keep reading characters in this loop until a good NMEA sentence is received    
      c=GPS.read(); //read a character from the GPS
     }
@@ -323,6 +329,7 @@ void readGPS(){  //This function will read and remember two NMEA sentences from 
     
   GPS.parse(GPS.lastNMEA());
   NMEA2=GPS.lastNMEA();
+  
   gps_latitude = GPS.latitude_fixed;
   gps_longitude = GPS.longitude_fixed;
   gps_altitude = GPS.altitude;
@@ -345,11 +352,16 @@ void clearGPS() {  //Since between GPS reads, we still have data streaming in, w
  
 }
 
-void senddata(int a, int b, int c){
-  sprintf(packet, "%d,%d,%d", a,b,c);
+void senddata(int x, int y, int z){
+  Serial.println("making packet....");
+  sprintf(packet, "%d,%d,%d", x,y,z);
   Serial.println(packet);
   rf69.send((uint8_t *)packet, sendlength); //sent encoded packet
   rf69.waitPacketSent();
   Serial.println("packet is sent");
+  
+  //delay(1000);
+
+  
   
   }

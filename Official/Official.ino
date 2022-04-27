@@ -96,41 +96,45 @@ void setup() {
 
   //SD card
   pinMode(pin_cs, OUTPUT);
-  SD.begin();
-
-  data = SD.open("data.csv", FILE_WRITE); //csv bestand maken
-  if(data){
-    Serial.println("\n csv bestand aanmaken");
-    data.print("time");
-    data.print(",");
-    data.print("pressure");
-    data.print(",");
-    data.print("temperature");
-    data.print(",");
-    data.print("altitude(MPU)");
-    data.print(",");
-    data.print("x_acceleration");
-    data.print(",");
-    data.print("y_acceleration");
-    data.print(",");
-    data.println("z_acceleration");
-    data.close();
-    Serial.println("csv_bestand aangemaakt");
+  //wachten tot sd een signaal heeft ->
+  waiting = true;
+  while(waiting){
+    SD.begin();
+    data = SD.open("data.csv", FILE_WRITE); //csv bestand maken
+    if(data){
+      Serial.println("\n csv bestand aanmaken");
+      data.print("time");
+      data.print(",");
+      data.print("pressure");
+      data.print(",");
+      data.print("temperature");
+      data.print(",");
+      data.print("altitude(MPU)");
+      data.print(",");
+      data.print("x_acceleration");
+      data.print(",");
+      data.print("y_acceleration");
+      data.print(",");
+      data.println("z_acceleration");
+      data.close();
+      Serial.println("csv_bestand aangemaakt");
+      waiting = false;
     
+      }
+      else {
+      Serial.println("error opening data.csv");
     }
-    else {
-    Serial.println("error opening data.csv");
-  }
+ }
 
   gps = SD.open("gps.csv", FILE_WRITE);
   
   if(gps){
     Serial.println("gps_bestand aangemaakt");
+    gps.print("altitude");
+    gps.print(",");
     gps.print("latitude");
     gps.print(",");
-    gps.print("longitude");
-    gps.print(",");
-    gps.println("altitude");
+    gps.println("longitude");
     gps.close();
     }
     else {
@@ -200,7 +204,7 @@ void loop() {
     }
       prevTime = currentTime;
     }
-   if(x == 10000){
+   if(x == 100000){
     Serial.println("metingen zijn gedaan");
     exit(0);
     }
@@ -297,12 +301,12 @@ void write_gps_to_SD(float a, float b, float c){
   if(gps){
     Serial.println("gps data opslaan naar kaart");
     a = a/y;
-    gps.print(a,7);
+    gps.print(c);
     gps.print(",");
     b = b/y;
-    gps.print(b,7);
+    gps.print(a,7);
     gps.print(",");
-    gps.println(c);
+    gps.println(b,7);
     gps.close();
     Serial.println("Done");
     }
@@ -362,6 +366,4 @@ void senddata(int x, int y, int z){
   
   //delay(1000);
 
-  
-  
   }

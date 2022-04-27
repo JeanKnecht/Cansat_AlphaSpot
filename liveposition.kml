@@ -1,0 +1,9 @@
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <NetworkLink>
+    <Link>
+      <href>position.kml</href>
+      <refreshMode>onInterval</refreshMode>
+      <refreshInterval>2</refreshInterval>
+    </Link>
+  </NetworkLink>
+</kml>

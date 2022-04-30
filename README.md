@@ -41,8 +41,9 @@ If we do the same with the default range d of the radio module (when a small ver
 To achieve distance D (1.5 km), the Yagi-antenna needs to have a gain L of:
 
 ![image info](./Image/eq5.png)
+
 This is the first value that is important to determine the amount of directors x we need. 
-To calculate the amount of directors x we used a program called “Yagi Uda Atenna Calcultor” which can be found on the following website: Online Calculator .:. Yagi Uda Antenna based on DL6WU (changpuak.ch) 
+To calculate the amount of directors x we used a program called “Yagi Uda Atenna Calcultor” which can be found on the following website:
 The program takes following parameters in account:
 Input
 ------

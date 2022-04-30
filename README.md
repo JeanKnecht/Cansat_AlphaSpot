@@ -41,14 +41,12 @@ To achieve distance D (1.5 km), the Yagi-antenna needs to have a gain L of: ??=?
 This is the first value that is important to determine the amount of directors x we need. 
 To calculate the amount of directors x we used a program called “Yagi Uda Atenna Calcultor” which can be found on the following website: Online Calculator .:. Yagi Uda Antenna based on DL6WU (changpuak.ch) 
 The program takes following parameters in account:
-
 Input
 ------
 - Frequency : 434 Mhz 
 - Boom diameter: 17mm 
 - Rod diameter: 4mm 
 - Number of directors: x 
-
 Output
 ------
 Gain: 10 dB 

@@ -31,12 +31,17 @@ We can calculate the path loss L for a signal with frequency f and a distance D 
 
 (with k being a constant and depends on the material in which the signal propagates. In air -> k = 32.4) 
 and when we enter the values:
+
 ![image info](./Image/eq2.png)
+
 If we do the same with the default range d of the radio module (when a small vertical antenna is attached)
  
 ![image info](./Image/eq3.png)
 
-To achieve distance D (1.5 km), the Yagi-antenna needs to have a gain L of: ??=??2???1=89?79=10 (????) 
+To achieve distance D (1.5 km), the Yagi-antenna needs to have a gain L of:
+
+![image info](./Image/eq4.png)
+
 This is the first value that is important to determine the amount of directors x we need. 
 To calculate the amount of directors x we used a program called “Yagi Uda Atenna Calcultor” which can be found on the following website: Online Calculator .:. Yagi Uda Antenna based on DL6WU (changpuak.ch) 
 The program takes following parameters in account:

@@ -68,4 +68,4 @@ And the result is:
 - D/lambda : 0.025 ( min.: 0.01 , max.: 0.05 ) 
 - Elements : 7 
 - Gain : 9.88 dBd (approx.) 
-==So the number of director needed is 7 – 2 (dipole and reflector) = 5== 
+== So the number of director needed is 7 – 2 (dipole and reflector) = 5 == 

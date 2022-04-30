@@ -48,18 +48,22 @@ int y = 10000000.0000000000;
 //time
 unsigned long Time;
 unsigned long prevTime;
+unsigned long startT;
+unsigned long stopT;
 
 //for testing 5000 times
 int x = 0;
 
 //radio (only for gps coordinates)
-int RF69_FREQ = 290.0;
+int RF69_FREQ = 434.0;
 int RFM69_CS = 11;
 int RFM69_INT = 9;
 int RFM69_RST = 12;
 RH_RF69 rf69(RFM69_CS, RFM69_INT);
 char packet[50];
 static int sendlength = 50;
+
+bool ex = false;
 
 void setup() {
   Serial.begin(115200);
@@ -68,7 +72,7 @@ void setup() {
   GPS.begin(9600);       //Turn GPS on at baud rate of 9600
   GPS.sendCommand("$PGCMD,33,0*6D"); // Turn Off GPS Antenna Update
   GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA); //Tell GPS we want only $GPRMC and $GPGGA NMEA sentences
-  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);   // 1 Hz update rate - kan 1HZ, 5HZ of 10HZ zijn
+  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_10HZ);   // 1 Hz update rate - kan 1HZ, 5HZ of 10HZ zijn
   delay(1000);  //Pause
 
 
@@ -118,18 +122,21 @@ void setup() {
       data.println("z_acceleration");
       data.close();
       Serial.println("csv_bestand aangemaakt");
+      
+      Serial.println("metingen zijn gestart");
+      startT = millis();
       waiting = false;
     
       }
       else {
-      Serial.println("error opening data.csv");
+      Serial.println("waiting for SD card");
     }
  }
 
   gps = SD.open("gps.csv", FILE_WRITE);
   
   if(gps){
-    Serial.println("gps_bestand aangemaakt");
+    //Serial.println("gps_bestand aangemaakt");
     gps.print("altitude");
     gps.print(",");
     gps.print("latitude");
@@ -173,7 +180,7 @@ void loop() {
   z_acceleration = (MPU_acceleration_z());
   Time = (millis())/1000; //convert to seconds
 
-  Serial.print(Time);
+  /*Serial.print(Time);
   Serial.print('\t');
   Serial.print(pressure);
   Serial.print('\t');
@@ -185,31 +192,34 @@ void loop() {
   Serial.print('\t');
   Serial.print(y_acceleration);
   Serial.print('\t');
-  Serial.print(z_acceleration);
+  Serial.print(z_acceleration);*/
 
   write_to_SD(Time,pressure,temperature,altitude1,x_acceleration,y_acceleration,z_acceleration);
   
   //retrieving GPS data
-  if((currentTime - prevTime > 2000)){ //it takes 2 seconds for the gps to recieve data, in that time we run the sensors instead of waiting
+  if((currentTime - prevTime > 200)){ //this is the most optimal waiting time for having enough data but also coorinates.
     readGPS();
     if(GPS.fix){
-      Serial.print(gps_latitude);
+      /*Serial.print(gps_latitude);
       Serial.print('\t');
       Serial.print(gps_longitude);
       Serial.print('\t');
       Serial.print(gps_altitude);
       //Serial.print('\t');
-      //Serial.print(gps_speed);
+      //Serial.print(gps_speed);*/
       write_gps_to_SD(gps_latitude,gps_longitude,gps_altitude);
     }
       prevTime = currentTime;
     }
-   if(x == 100000){
-    Serial.println("metingen zijn gedaan");
+
+   if(ex){
+    stopT = millis();
+
+    Serial.println(stopT - startT);
     exit(0);
     }
   x++;
-  delay(100);
+  //delay(100);
 
 }
 
@@ -271,7 +281,7 @@ float MPU_acceleration_z(){
 void write_to_SD(float a,float b,float c,float d,float e, float f, float g){
   data = SD.open("data.csv", FILE_WRITE);
   if(data){
-    Serial.println("\n data opslaan naar kaart....");
+    //Serial.println("\n data opslaan naar kaart....");
     data.print(a);
     data.print(",");
     data.print(b);
@@ -286,11 +296,12 @@ void write_to_SD(float a,float b,float c,float d,float e, float f, float g){
     data.print(",");
     data.println(g);
     data.close();
-    Serial.println("Done");
+    //Serial.println("Done");
     
     }
     else {
     Serial.println("error opening data.csv");
+    ex = true;
   }
 }
 
@@ -299,7 +310,7 @@ void write_gps_to_SD(float a, float b, float c){
   gps_altitude = int(gps_altitude * 100);
   senddata(gps_latitude, gps_longitude, gps_altitude);
   if(gps){
-    Serial.println("gps data opslaan naar kaart");
+    //Serial.println("gps data opslaan naar kaart");
     a = a/y;
     gps.print(c);
     gps.print(",");
@@ -308,7 +319,7 @@ void write_gps_to_SD(float a, float b, float c){
     gps.print(",");
     gps.println(b,7);
     gps.close();
-    Serial.println("Done");
+    //Serial.println("Done");
     }
     else{
       Serial.println("error opening gps.txt");
@@ -319,7 +330,7 @@ void write_gps_to_SD(float a, float b, float c){
 void readGPS(){  //This function will read and remember two NMEA sentences from GPS
   //clearGPS();    //Serial port probably has old or corrupt data, so begin by clearing it all out
 
-  Serial.print("checking");
+  //Serial.println("checking");
   while(!GPS.newNMEAreceived()) { //Keep reading characters in this loop until a good NMEA sentence is received    
      c=GPS.read(); //read a character from the GPS
     }
@@ -357,9 +368,9 @@ void clearGPS() {  //Since between GPS reads, we still have data streaming in, w
 }
 
 void senddata(int x, int y, int z){
-  Serial.println("making packet....");
+  //Serial.println("making packet....");
   sprintf(packet, "%d,%d,%d", x,y,z);
-  Serial.println(packet);
+  //Serial.println(packet);
   rf69.send((uint8_t *)packet, sendlength); //sent encoded packet
   rf69.waitPacketSent();
   Serial.println("packet is sent");

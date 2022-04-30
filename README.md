@@ -17,7 +17,7 @@ makes a simulation with the gps coordinates in blender to precisely see the path
 
 # Mechanical
 
-##Antenna
+## Antenna
 To receive the data that will be send by a radio module with a smaller vertical antenna, an antenna is needed. The antenna consists of a reflector, a dipole and a x number of directors. The number of directors will determine how much a certain signal is amplified, expressed in decibels. 
 To work as efficiently as possible, we have used the following calculations to theoretically determine how many directors x we need. These are the values we worked with: 
 f (frequency) = 434 Mhz d (default range without antenna) = 500 m = 0.5 km D (range that we want to achieve) = 1500m = 1.5 km 
@@ -49,7 +49,7 @@ Gain: 10 dB
 
 And if we now enter a different number of directors each time, we can search for the ideal combination so that we have a gain of about 10 db. 
 And the result is: 
--------------------------------- 
+
 Frequency : 434 MHz 
 Wavelength : 691 mm 
 Rod Diameter : 4 mm 

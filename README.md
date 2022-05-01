@@ -1,6 +1,6 @@
 # Materials
 
-![image info](./Image/primary.png)
+![image info](./Image/prime.png)
 
 # Software
 

@@ -12,6 +12,8 @@ coordinates send by the arduino Feather.
 - Antenna: a 7 element yagi antenna with the dipole connected to a radio module
 ## live gps
 program, run on a pc, that takes the gps coordinates that are retrieved from the antenna and places them in google earth in wich you can then see the live location of the cansat
+### result after taking a walk in my city
+![image info](./Image/eq5.png)
 ## raket
 makes a simulation with the gps coordinates in blender to precisely see the path of the cansat in 3D
 
@@ -43,7 +45,7 @@ To achieve distance D (1.5 km), the Yagi-antenna needs to have a gain L of:
 ![image info](./Image/eq5.png)
 
 This is the first value that is important to determine the amount of directors x we need. 
-To calculate the amount of directors x we used a program called “Yagi Uda Atenna Calcultor” which can be found on the following website: Online Calculator .:. Yagi Uda Antenna based on DL6WU (changpuak.ch) 
+To calculate the amount of directors x we used a program called ï¿½Yagi Uda Atenna Calcultorï¿½ which can be found on the following website: Online Calculator .:. Yagi Uda Antenna based on DL6WU (changpuak.ch) 
 The program takes following parameters in account:
 Input
 
@@ -68,7 +70,7 @@ And the result is:
 - D/lambda : 0.025 ( min.: 0.01 , max.: 0.05 ) 
 - Elements : 7 
 - Gain : 9.88 dBd (approx.) 
-So the number of director needed is 7 – 2 (dipole and reflector) = 5
+So the number of director needed is 7 ï¿½ 2 (dipole and reflector) = 5
 
 ### Final result
 

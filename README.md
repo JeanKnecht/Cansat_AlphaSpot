@@ -1,7 +1,3 @@
-# Materials
-
-![image info](./Image/prime.png)
-
 # Software
 
 ## Official 
@@ -22,6 +18,10 @@ program, run on a pc, that takes the gps coordinates that are retrieved from the
 makes a simulation with the gps coordinates in blender to precisely see the path of the cansat in 3D
 
 # Mechanical
+
+## Feather
+
+![image info](./Image/primary.png)
 
 ## Antenna
 To receive the data that will be send by a radio module with a smaller vertical antenna, an antenna is needed. The antenna consists of a reflector, a dipole and a x number of directors. The number of directors will determine how much a certain signal is amplified, expressed in decibels. 

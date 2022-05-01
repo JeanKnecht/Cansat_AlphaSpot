@@ -20,18 +20,17 @@ makes a simulation with the gps coordinates in blender to precisely see the path
 # Mechanical
 
 ## Feather
+- Arduino Feather M0 Express
+- Featherwing prototyping shield
+- BMP280
+- RFM69 Radio (2x, 1 receiver, 1 sender)
+- MPU6050
+- SD logger
+- GPS breakout V3
+- Re-Lithium battery lp803450 (3.7v 1500 mah) with jst connection
 
-![image info](./Image/primary.png)  - Arduino Feather M0 Express
-                                    - Featherwing prototyping shield
-                                    - BMP280
-                                    - RFM69 Radio (2x, 1 receiver, 1 sender)
-                                    - MPU6050
-                                    - SD logger
-                                    - GPS breakout V3
-                                    - Re-Lithium battery lp803450 (3.7v 1500 mah) with jst connection
-
-                                    
-
+![image info](./Image/primary.png)
+                             
 ## Antenna
 To receive the data that will be send by a radio module with a smaller vertical antenna, an antenna is needed. The antenna consists of a reflector, a dipole and a x number of directors. The number of directors will determine how much a certain signal is amplified, expressed in decibels. 
 To work as efficiently as possible, we have used the following calculations to theoretically determine how many directors x we need. These are the values we worked with:

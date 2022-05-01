@@ -72,7 +72,7 @@ void setup() {
   GPS.begin(9600);       //Turn GPS on at baud rate of 9600
   GPS.sendCommand("$PGCMD,33,0*6D"); // Turn Off GPS Antenna Update
   GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA); //Tell GPS we want only $GPRMC and $GPGGA NMEA sentences
-  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_10HZ);   // 1 Hz update rate - kan 1HZ, 5HZ of 10HZ zijn
+  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_5HZ);   // 1 Hz update rate - kan 1HZ, 5HZ of 10HZ zijn
   delay(1000);  //Pause
 
 

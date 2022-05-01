@@ -13,7 +13,7 @@ coordinates send by the arduino Feather.
 ## live gps
 program, run on a pc, that takes the gps coordinates that are retrieved from the antenna and places them in google earth in wich you can then see the live location of the cansat
 ### result after taking a walk in my city
-![image info](./Image/eq5.png)
+![image info](./Image/gps.png)
 ## raket
 makes a simulation with the gps coordinates in blender to precisely see the path of the cansat in 3D
 

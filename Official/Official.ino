@@ -18,7 +18,7 @@ Adafruit_BMP280 bmp; // I2C
 
 float pressure;
 float pressure_calibration; //for calibration of altimeter, this calibration happens when sensor is turned on
-bool calibration = true; //turns false after first run. First run is assumed to be at heigth 0
+//bool calibration = true; //turns false after first run. First run is assumed to be at heigth 0
 float temperature;
 float altitude1;
 
@@ -65,8 +65,13 @@ static int sendlength = 50;
 
 bool ex = false;
 
+//buzzer
+
+const int buzzerPin = A1;
+
 void setup() {
   Serial.begin(115200);
+  pinMode(buzzerPin, OUTPUT);
 
   //setup gps
   GPS.begin(9600);       //Turn GPS on at baud rate of 9600
@@ -83,6 +88,7 @@ void setup() {
     delay(1000);
     if(GPS.fix){
       Serial.println("location is fixed");
+      buzzer();
       waiting = false;
       }else{
       
@@ -125,6 +131,7 @@ void setup() {
       
       Serial.println("metingen zijn gestart");
       startT = millis();
+      buzzer();
       waiting = false;
     
       }
@@ -146,7 +153,8 @@ void setup() {
     }
     else {
     Serial.println("error opening gps.csv");
-  }
+
+    }
 
   //Setup radio
   pinMode(RFM69_RST, OUTPUT);
@@ -162,6 +170,21 @@ void setup() {
                     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
   rf69.setEncryptionKey(key);
   Serial.print("RFM69 radio @");  Serial.print((int)RF69_FREQ);  Serial.println(" MHz"); //in code -> verstuurt via freq
+
+  //calibrating pressure sensor (setting current pressure to height = 0)
+  pressure_calibration = BMP280_Pressure();
+  Serial.print("calibration is succesfull. Pressure at height 0 is: ");
+  Serial.println(pressure_calibration);
+
+  //waiting till a heigth of 3 meters has been reached
+  waiting = true;
+  while(waiting){
+    float altTrigger = BMP280_Altitude();
+    if(altTrigger >= 3){
+      buzzer();
+      waiting = false;
+      }
+    }
 
   //threading (getting gps data takes 2 seconds and a lot of data from the other sensors is lost in that time period. With threading we can run different tasks at the same time.
   prevTime = millis();
@@ -237,12 +260,6 @@ float BMP280_Temperature(){
 }
 
 float BMP280_Altitude(){
-  if(calibration){
-    pressure_calibration = BMP280_Pressure();
-    calibration = false;
-    Serial.print("calibration is succesfull. Pressure at height 0 is: ");
-    Serial.println(pressure_calibration);
-    }
   altitude1 = bmp.readAltitude(pressure_calibration/100); //converting to hPa
 
   return altitude1;
@@ -377,4 +394,16 @@ void senddata(int x, int y, int z){
   
   //delay(1000);
 
+}
+
+void buzzer() {
+  tone(buzzerPin, 1000);
+  delay(500);
+  noTone(buzzerPin);
+  delay(500);
+  tone(buzzerPin, 1000);
+  delay(500);
+  noTone(buzzerPin);
+  delay(500);
+  
   }

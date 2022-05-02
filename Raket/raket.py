@@ -17,6 +17,9 @@ CoList = Content.split("\n")
   
 x = 0
 
+bpy.context.scene.render.fps = 4
+bpy.context.scene.render.fps_base = 1
+
 for i in CoList:
     if i:
         counter += 1
@@ -69,8 +72,8 @@ for i in range(dataLength):
         y_axis = 0.00
         x_axis = 0.00
         z_axis = 0.00
-             
-    raket.location.y = y_axis
+    
     raket.location.x = x_axis
+    raket.location.y = y_axis
     raket.location.z = z_axis
     raket.keyframe_insert(data_path="location", frame=i)

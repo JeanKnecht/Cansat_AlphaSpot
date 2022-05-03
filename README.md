@@ -25,6 +25,7 @@ makes a simulation with the gps coordinates in blender to precisely see the path
 - BMP280
 - RFM69 Radio (2x, 1 receiver, 1 sender)
 - MPU6050
+- Buzzer
 - SD logger
 - GPS breakout V3
 - Re-Lithium battery lp803450 (3.7v 1500 mah) with jst connection

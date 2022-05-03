@@ -29,7 +29,7 @@ makes a simulation with the gps coordinates in blender to precisely see the path
 - GPS breakout V3
 - Re-Lithium battery lp803450 (3.7v 1500 mah) with jst connection
 
-![image info](./Image/primary.png) ![image info](./Image/primary2.png)
+![image info](./Image/primary.png) ![image info](./Image/primary21.png)
                              
 ## Antenna
 To receive the data that will be send by a radio module with a smaller vertical antenna, an antenna is needed. The antenna consists of a reflector, a dipole and a x number of directors. The number of directors will determine how much a certain signal is amplified, expressed in decibels. 

@@ -14,7 +14,7 @@
 /************ Radio Setup ***************/
 
 // Change to 434.0 or other frequency, must match RX's freq!
-int RF69_FREQ = 434.0;
+int RF69_FREQ = 434.50;
 int RFM69_CS = 4;
 int RFM69_INT = 3;
 int RFM69_RST = 2;
@@ -35,7 +35,7 @@ void setup()
   digitalWrite(RFM69_RST, LOW);
   delay(10);
   rf69.init();
-  rf69.setFrequency(434.0);
+  rf69.setFrequency(434.50);
   rf69.setTxPower(20, true);
   uint8_t key[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};

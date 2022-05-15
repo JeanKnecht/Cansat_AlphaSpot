@@ -8,6 +8,13 @@
 #include <Adafruit_GPS.h> //Load the GPS Library. Make sure you have installed the library form the adafruit site above
 #define GPSSerial Serial1
 
+#define STEPPER_PIN_1 10
+#define STEPPER_PIN_2 6
+#define STEPPER_PIN_3 A4
+#define STEPPER_PIN_4 A2
+
+int step_number = 0;
+boolean figureCompleted = false;
 //BMP280
 #define BMP_SCK  (13)
 #define BMP_MISO (12)
@@ -18,6 +25,8 @@ Adafruit_BMP280 bmp; // I2C
 
 float pressure;
 float pressure_calibration; //for calibration of altimeter, this calibration happens when sensor is turned on
+float prepressure = 0; //for calculating when the cansat is going down in altitude
+bool runned = true;
 //bool calibration = true; //turns false after first run. First run is assumed to be at heigth 0
 float temperature;
 float altitude1;
@@ -28,6 +37,9 @@ Adafruit_MPU6050 mpu;
 float x_acceleration; //graph with 3 lines
 float y_acceleration;
 float z_acceleration;
+
+int dalen = 0;
+bool descent = false;
 
 //SD card
 File data;
@@ -50,12 +62,14 @@ unsigned long Time;
 unsigned long prevTime;
 unsigned long startT;
 unsigned long stopT;
+unsigned long prevTime2;
+unsigned long prevTime3;
 
 //for testing 5000 times
 int x = 0;
 
 //radio (only for gps coordinates)
-int RF69_FREQ = 434.0;
+int RF69_FREQ = 434.50;
 int RFM69_CS = 11;
 int RFM69_INT = 9;
 int RFM69_RST = 12;
@@ -69,6 +83,8 @@ bool ex = false;
 
 const int buzzerPin = A1;
 
+int powerPin = A5;
+
 void setup() {
   Serial.begin(115200);
   pinMode(buzzerPin, OUTPUT);
@@ -80,6 +96,17 @@ void setup() {
   GPS.sendCommand(PMTK_SET_NMEA_UPDATE_5HZ);   // 1 Hz update rate - kan 1HZ, 5HZ of 10HZ zijn
   delay(1000);  //Pause
 
+  pinMode(STEPPER_PIN_1, OUTPUT);
+  pinMode(STEPPER_PIN_2, OUTPUT);
+  pinMode(STEPPER_PIN_3, OUTPUT);
+  pinMode(STEPPER_PIN_4, OUTPUT);
+
+  pinMode(powerPin, OUTPUT);
+  
+  digitalWrite(STEPPER_PIN_1, LOW);
+  digitalWrite(STEPPER_PIN_2, LOW);
+  digitalWrite(STEPPER_PIN_3, LOW);
+  digitalWrite(STEPPER_PIN_4, LOW);
 
   //wachten tot gps een signaal heeft -> wanneer latitude != 0
   bool waiting = true;
@@ -164,7 +191,7 @@ void setup() {
   digitalWrite(RFM69_RST, LOW);
   delay(10);
   rf69.init();
-  rf69.setFrequency(434.0);
+  rf69.setFrequency(434.50);
   rf69.setTxPower(20, true); //max power
   uint8_t key[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
@@ -177,10 +204,10 @@ void setup() {
   Serial.println(pressure_calibration);
 
   //waiting till a heigth of 3 meters has been reached
-  waiting = true;
+  waiting = false;
   while(waiting){
     float altTrigger = BMP280_Altitude();
-    if(altTrigger >= 3){
+    if(altTrigger >= 0){
       buzzer();
       waiting = false;
       }
@@ -188,6 +215,7 @@ void setup() {
 
   //threading (getting gps data takes 2 seconds and a lot of data from the other sensors is lost in that time period. With threading we can run different tasks at the same time.
   prevTime = millis();
+  Serial.println("start");
 }
 
 void loop() {
@@ -203,6 +231,23 @@ void loop() {
   z_acceleration = (MPU_acceleration_z());
   Time = (millis())/1000; //convert to seconds
 
+  /*if (pressure > prepressure){
+    dalen++;
+    }else{
+      dalen = 0;
+      }
+      
+  if(dalen > -1){
+    descent = true;
+    Serial.println("dalen");
+    }    
+
+  if(descent) {
+    stepperControl();
+    }
+    
+  prepressure = pressure;*/
+  
   /*Serial.print(Time);
   Serial.print('\t');
   Serial.print(pressure);
@@ -343,7 +388,7 @@ void write_gps_to_SD(float a, float b, float c){
       }
   
   }
-
+  
 void readGPS(){  //This function will read and remember two NMEA sentences from GPS
   //clearGPS();    //Serial port probably has old or corrupt data, so begin by clearing it all out
 
@@ -406,4 +451,156 @@ void buzzer() {
   noTone(buzzerPin);
   delay(500);
   
+  }
+
+void turnRight() {                        //maakt effe touwtje korter in de ene richting en dan terug langer
+  revolution(true);
+  revolution(false);
+}
+
+void turnLeft() {
+  revolution(false);
+  revolution(true);
+}
+
+void corkscrew() {
+  revolution(true);
+}
+
+void revolution(bool dir) {
+  for(int i = 0; i < 2048; i++) {
+    OneStep(dir); 
+    delay(2);
+    }
+}
+
+void OneStep(bool dir){
+    if(dir){
+      switch(step_number){
+        case 0:
+        digitalWrite(STEPPER_PIN_1, HIGH);
+        digitalWrite(STEPPER_PIN_2, LOW);
+        digitalWrite(STEPPER_PIN_3, LOW);
+        digitalWrite(STEPPER_PIN_4, LOW);
+        break;
+        case 1:
+        digitalWrite(STEPPER_PIN_1, LOW);
+        digitalWrite(STEPPER_PIN_2, HIGH);
+        digitalWrite(STEPPER_PIN_3, LOW);
+        digitalWrite(STEPPER_PIN_4, LOW);
+        break;
+        case 2:
+        digitalWrite(STEPPER_PIN_1, LOW);
+        digitalWrite(STEPPER_PIN_2, LOW);
+        digitalWrite(STEPPER_PIN_3, HIGH);
+        digitalWrite(STEPPER_PIN_4, LOW);
+        break;
+        case 3:
+        digitalWrite(STEPPER_PIN_1, LOW);
+        digitalWrite(STEPPER_PIN_2, LOW);
+        digitalWrite(STEPPER_PIN_3, LOW);
+        digitalWrite(STEPPER_PIN_4, HIGH);
+        break;
+      }
+  }else{
+        switch(step_number){
+      case 0:
+      digitalWrite(STEPPER_PIN_1, LOW);
+      digitalWrite(STEPPER_PIN_2, LOW);
+      digitalWrite(STEPPER_PIN_3, LOW);
+      digitalWrite(STEPPER_PIN_4, HIGH);
+      break;
+      case 1:
+      digitalWrite(STEPPER_PIN_1, LOW);
+      digitalWrite(STEPPER_PIN_2, LOW);
+      digitalWrite(STEPPER_PIN_3, HIGH);
+      digitalWrite(STEPPER_PIN_4, LOW);
+      break;
+      case 2:
+      digitalWrite(STEPPER_PIN_1, LOW);
+      digitalWrite(STEPPER_PIN_2, HIGH);
+      digitalWrite(STEPPER_PIN_3, LOW);
+      digitalWrite(STEPPER_PIN_4, LOW);
+      break;
+      case 3:
+      digitalWrite(STEPPER_PIN_1, HIGH);
+      digitalWrite(STEPPER_PIN_2, LOW);
+      digitalWrite(STEPPER_PIN_3, LOW);
+      digitalWrite(STEPPER_PIN_4, LOW);
+     
+      
+    } 
+  }
+  step_number++;
+    if(step_number > 3){
+      step_number = 0;
+  }
+}
+
+void stepperControl(){        
+    digitalWrite(powerPin, HIGH);
+    Serial.println("stepper1");
+    if (figureCompleted == false) {
+    turnRight();
+    prevTime2 = millis();
+    prevTime3 = millis();
+    metingenDelay_4();
+    turnLeft();
+    Serial.println("stepper2");
+    prevTime2 = millis();
+    prevTime3 = millis();
+    metingenDelay_4();
+    turnRight();
+    Serial.println("stepper3");
+    prevTime2 = millis();
+    prevTime3 = millis();
+    metingenDelay_4();
+    turnLeft();
+    prevTime2 = millis();
+    prevTime3 = millis();
+    metingenDelay_4();
+    corkscrew();
+    digitalWrite(powerPin, LOW);
+    figureCompleted = true;
+    Serial.println("verder meten");
+  }
+}
+
+void metingenDelay_4(){
+  bool meten = true;
+  while(meten){
+    unsigned long currentTime2 = millis(); //for threading
+    unsigned long currentTime3 = millis(); //for threading
+  
+    pressure = BMP280_Pressure();
+    temperature = BMP280_Temperature();
+    altitude1 = BMP280_Altitude();
+    x_acceleration = (MPU_acceleration_x()); //for absolute values use -> abs()
+    y_acceleration = (MPU_acceleration_y());
+    z_acceleration = (MPU_acceleration_z());
+    Time = (millis())/1000; //convert to seconds
+
+    write_to_SD(Time,pressure,temperature,altitude1,x_acceleration,y_acceleration,z_acceleration);
+  
+  //retrieving GPS data
+    if((currentTime3 - prevTime3 > 200)){ //this is the most optimal waiting time for having enough data but also coorinates.
+      readGPS();
+      if(GPS.fix){
+      /*Serial.print(gps_latitude);
+      Serial.print('\t');
+      Serial.print(gps_longitude);
+      Serial.print('\t');
+      Serial.print(gps_altitude);
+      //Serial.print('\t');
+      //Serial.print(gps_speed);*/
+        write_gps_to_SD(gps_latitude,gps_longitude,gps_altitude);
+      }
+        prevTime3 = currentTime3;
+      }
+
+   if((currentTime2 - prevTime2 > 4000)){
+
+    meten = false;}
+  
+}
   }

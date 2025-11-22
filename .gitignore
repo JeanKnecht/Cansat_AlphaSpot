@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+
+# Arduino
+*.hex
+*.eep
+*.elf
+build/
+*.o
+*.a
+*.lib
+
+# Data files (often large)
+data/
+*.csv
+*.txt
+*.kml
+
+# Blender
+*.blend
+*.blend1
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Internal/Helper Documentation (keep locally, don't push)
+docs/helpers/
+!docs/helpers/.gitkeep
+
+# Only track README.md (main documentation)
+!README.md
+
